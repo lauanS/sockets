@@ -15,5 +15,7 @@ server_socket.listen(5)
 print('Iniciando conexão')
 while True:
     # aceita conexões da rede, retornando uma tupla com a conexão realizada
-    (client_socket, address) = server_socket.accept()
-    print('Conectado')
+    (connection, address) = server_socket.accept()
+    print('Conectado com {}'.format(address))
+    # Exibindo a mensagem enviada em um buffer de até 1024 bytes
+    print(connection.recv(1024))
