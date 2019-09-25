@@ -1,19 +1,16 @@
 import socket
 from threading import Thread
 
-import json
-import time
 import base64
-
 import re
+
 def get_msg(msg):
     # Decodificando a msg em UTF-8
     re_msg = msg.decode('utf-8')
+
+    # Obtendo o tipo da operação e o nome do arquivo
     type = re.search(r'"type":"(.+?)", "file', re_msg)
     file = re.search(r'"file":"(.+?)", "msg', re_msg)
-
-    print(type.group(1))
-    print(file.group(1))
 
     return type.group(1), file.group(1)
 
@@ -37,7 +34,6 @@ def process(connection):
 
     # Obtendo as informações da mensagem recebida
     start_msq = 30 + len(operation) + len(file_name)
-
     arq = msg[start_msq:-2]
 
     # Definindo qual operação será executada
