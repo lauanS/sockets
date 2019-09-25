@@ -3,11 +3,19 @@ from threading import Thread
 
 import json
 import time
+import base64
+
+
+def get_msg(msg):
+    pass
+
+
 
 def process(connection):
     msg = b''
     read_bytes = connection.recv(4096)
     count = 1
+
     # Lendo todos os bytes da recebidos
     while read_bytes:
         # print('lendo[{}]...'.format(count))
@@ -15,20 +23,32 @@ def process(connection):
         read_bytes = connection.recv(4096)
         count += 1
     print('{} bytes lidos'.format(len(msg)))
-    print('msg lida: {}'.format(msg[-50:]))
-    # Finalizando a conexão
-    msg = msg.decode('utf-8')
-    print(msg[-50:])
-    operation, file_name, msg = json_to_vars(msg);
+    print('msg lida: {} [...] {}'.format(msg[:60], msg[-10:]))
+
+    # Obtendo o arquivo
+
+    # Decodificando a msg em UTF-8 para a biblioteca do JSON
+    msg_utf = (msg[:49] + b'Hello"}').decode('utf-8')
+
+    # Obtendo as informações da mensagem recebida
+    operation, file_name = json_to_vars(msg_utf)
+
+    start_msq = 31 + len(operation) + len(file_name)
+
+    arq = msg[start_msq:-2]
+    # Definindo qual operação será executada
     if operation == 'read':
         read_file(file_name, connection)
     if operation == 'write':
-        write_file(file_name, msg)
+        write_file(file_name, arq)
+
+    # Finalizando a conexão
     connection.close()
 
-def json_to_vars(json_bits):
-    dict_msg = json.loads(json_bits)
-    return dict_msg['type'], dict_msg['file'], dict_msg['msg']
+
+def json_to_vars(json_bytes):
+    dict_msg = json.loads(json_bytes)
+    return dict_msg['type'], dict_msg['file']
 
 
 
@@ -44,8 +64,15 @@ def read_file(file_name, connection):
 
 def write_file(file_name, msg):
     # Salvando o arquivo
-    with open(file_name, 'w') as file:
+    with open('temp_file.txt', 'wb') as file:
         file.write(msg)
+
+    with open('temp_file.txt', 'rb') as file:
+        with open(file_name, 'wb') as file_output:
+            base64.decode(file, file_output)
+
+    # with open(file_name, 'wb') as file:
+    #     file.write(msg)
 
 if __name__ == '__main__':
     # Criando um novo socket
