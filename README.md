@@ -21,3 +21,11 @@ ao mesmo tempo ou use threads também do lado do cliente.
 
 > O cliente deverá ser desenvolvidona linguagem A e o servidor na linguagem B, sendo A ≠ B.
 > A escolha da linguagem de programação a ser usada fica a critério da dupla
+
+##### Comunicação
+
+O cliente manda uma mensagem em JSON com o seguinte formato:
+
+```JSON
+  {"type":"write", "file":"new_file.jpeg", "msg":"Sample"}
+```
