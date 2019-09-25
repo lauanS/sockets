@@ -5,9 +5,17 @@ import json
 import time
 import base64
 
-
+import re
 def get_msg(msg):
-    pass
+    # Decodificando a msg em UTF-8
+    re_msg = msg.decode('utf-8')
+    type = re.search(r'"type":"(.+?)", "file', re_msg)
+    file = re.search(r'"file":"(.+?)", "msg', re_msg)
+
+    print(type.group(1))
+    print(file.group(1))
+
+    return type.group(1), file.group(1)
 
 
 
@@ -18,24 +26,20 @@ def process(connection):
 
     # Lendo todos os bytes da recebidos
     while read_bytes:
-        # print('lendo[{}]...'.format(count))
         msg += read_bytes
         read_bytes = connection.recv(4096)
         count += 1
     print('{} bytes lidos'.format(len(msg)))
     print('msg lida: {} [...] {}'.format(msg[:60], msg[-10:]))
 
-    # Obtendo o arquivo
-
-    # Decodificando a msg em UTF-8 para a biblioteca do JSON
-    msg_utf = (msg[:49] + b'Hello"}').decode('utf-8')
+    # Lendo o JSON
+    operation, file_name = get_msg(msg)
 
     # Obtendo as informações da mensagem recebida
-    operation, file_name = json_to_vars(msg_utf)
-
-    start_msq = 31 + len(operation) + len(file_name)
+    start_msq = 30 + len(operation) + len(file_name)
 
     arq = msg[start_msq:-2]
+
     # Definindo qual operação será executada
     if operation == 'read':
         read_file(file_name, connection)
@@ -44,12 +48,6 @@ def process(connection):
 
     # Finalizando a conexão
     connection.close()
-
-
-def json_to_vars(json_bytes):
-    dict_msg = json.loads(json_bytes)
-    return dict_msg['type'], dict_msg['file']
-
 
 
 def read_file(file_name, connection):
@@ -71,8 +69,6 @@ def write_file(file_name, msg):
         with open(file_name, 'wb') as file_output:
             base64.decode(file, file_output)
 
-    # with open(file_name, 'wb') as file:
-    #     file.write(msg)
 
 if __name__ == '__main__':
     # Criando um novo socket

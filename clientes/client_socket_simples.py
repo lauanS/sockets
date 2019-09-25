@@ -17,7 +17,7 @@ def encode_64():
     return base64_str
 
 
-msg = b'{ "type":"write", "file":"new_file.jpeg", "msg":"'
+msg = b'{"type":"write", "file":"new_file2.jpeg", "msg":"'
 msg += encode_64()
 msg += b'"}'
 
