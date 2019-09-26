@@ -3,6 +3,7 @@ from threading import Thread
 
 import base64
 import re
+import time
 
 def get_msg(msg):
     # Decodificando a msg em UTF-8
@@ -15,17 +16,16 @@ def get_msg(msg):
     return type.group(1), file.group(1)
 
 
-
+def proces(connection):
+    read_file('test_read.txt', connection)
 def process(connection):
     msg = b''
     read_bytes = connection.recv(4096)
-    count = 1
 
     # Lendo todos os bytes da recebidos
     while read_bytes:
         msg += read_bytes
         read_bytes = connection.recv(4096)
-        count += 1
     print('{} bytes lidos'.format(len(msg)))
     print('msg lida: {} [...] {}'.format(msg[:60], msg[-10:]))
 
@@ -47,13 +47,16 @@ def process(connection):
 
 
 def read_file(file_name, connection):
+    # Lendo o arquivo solicitado
     with open(file_name, 'rb') as file:
         msg = file.read()
     total_sent = 0
+
+    # Enviando o arquivo
     while total_sent < len(msg):
         sent = connection.send(msg[total_sent:])
         if sent == 0:
-            raise RuntimeError("socket connection broken")
+            raise RuntimeError("Erro de conexão com o socket")
         total_sent = total_sent + sent
 
 def write_file(file_name, msg):

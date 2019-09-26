@@ -1,25 +1,7 @@
 import socket
 import base64
 
-
-def encode_64():
-    input = open('/home/lauans/law/gitRep/sockets/img_sockets.jpeg', 'rb')
-    output = open('/home/lauans/law/gitRep/sockets/txt_img.txt', 'wb')
-
-    base64.encode(input, output)
-
-    input.close()
-    output.close()
-
-    with open('/home/lauans/law/gitRep/sockets/txt_img.txt', 'rb') as file:
-        base64_str = file.read()
-
-    return base64_str
-
-
-msg = b'{"type":"write", "file":"new_file2.jpeg", "msg":"'
-msg += encode_64()
-msg += b'"}'
+msg = b'{"type":"read", "file":"test_read.txt", "msg":"Sample"}'
 
 # criando o socket
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -35,5 +17,18 @@ while totalsent < len(msg):
     if sent == 0:
         raise RuntimeError("socket connection broken")
     totalsent = totalsent + sent
+
+# Avisa para o servidor que terminei de enviar os dados
+# porém ele deve manter a conexão aberta
+client_socket.shutdown(1)
+msg = b''
+read_bytes = client_socket.recv(4096)
+
+while read_bytes:
+    msg += read_bytes
+    read_bytes = client_socket.recv(4096)
+
+print("bytes lidos:")
+print(read_bytes)
 
 client_socket.close()
